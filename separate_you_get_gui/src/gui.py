@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from pprint import pprint
 from typing import List, Optional
-from logging import config, root
 from multiprocessing import Value
 import tkinter as tk
 from tkinter import ttk
@@ -37,8 +36,11 @@ class CommandBuilder:
         final_stirng += self.url
         return final_stirng
 
-    def insert_flag(self, flag: Flag):
+    def insert_flag(self, flag: Flag) -> None:
         self.flags.append(flag)
+
+    def clear_flags(self) -> None:
+        self.flags.clear()
 
 
 class YouGetGUI:
@@ -400,6 +402,7 @@ class YouGetGUI:
         self.first_step_widget()
 
     def save_settings(self):
+        self.builder.clear_flags()
         if self.print_var.get():
             self.builder.insert_flag(
                 self.dry_run_options_list[self.print_combobox.current()]
