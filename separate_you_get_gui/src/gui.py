@@ -1,7 +1,5 @@
 from dataclasses import dataclass, field
-from pprint import pprint
-from typing import List, Optional
-from multiprocessing import Value
+from typing import List
 import tkinter as tk
 from tkinter import ttk
 import subprocess
@@ -118,9 +116,6 @@ class YouGetGUI:
         ]
         self.host_port_entry_var = tk.StringVar()
 
-
-
-
         self.first_step_widget()
 
     def first_step_widget(self):
@@ -148,7 +143,7 @@ class YouGetGUI:
         self.url_entry.config(state="disabled")
 
         self.download_button = ttk.Button(
-            self.main_frame, text="Download", command=self.builder.build()
+            self.main_frame, text="Download", command=self.download
         )
 
         self.download_button.grid(column=1, row=0, padx=5, pady=5)
@@ -437,9 +432,29 @@ class YouGetGUI:
             if self.other_proxy_options_vars[idx].get():
                 self.builder.insert_flag(flag)
 
-        pprint(self.builder.build())
-
         self.hide_settings_window()
+
+    def download(self):
+        final_command = self.builder.build()
+        print(final_command)
+        process = subprocess.Popen(
+            final_command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+        )
+        self.output_window = tk.Toplevel(self.root)
+        self.output_window.geometry("720x405")
+        self.output_window.resizable(False, False)
+
+        output_text = tk.Text(self.output_window, width=80, height=20)
+        output_text.pack()
+
+        self.output_window.title("Output")
+        for line in process.stdout:
+            output_text.insert(tk.END, line)
+            output_text.see(tk.END)
 
     def clear_url_entry(self, event):
         if self.url_entry.get() == "Enter your URL here...":
