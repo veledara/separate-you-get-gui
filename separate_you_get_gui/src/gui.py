@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from pprint import pprint
 from typing import List, Optional
-from logging import config
+from logging import config, root
 from multiprocessing import Value
 import tkinter as tk
 from tkinter import ttk
@@ -15,7 +15,10 @@ class Flag:
     value: str = field(default_factory=str)
 
     def __str__(self) -> str:
-        return self.verbose_name + self.value if self.value else ""
+        if self.value:
+            return self.command + " " + self.value
+        else:
+            return self.command
 
 
 class CommandBuilder:
@@ -28,7 +31,11 @@ class CommandBuilder:
         self.flags = []
 
     def build(self) -> str:
-        pass
+        final_stirng = self.root_command + " "
+        for flag in self.flags:
+            final_stirng += str(flag) + " "
+        final_stirng += self.url
+        return final_stirng
 
     def insert_flag(self, flag: Flag):
         self.flags.append(flag)
@@ -163,11 +170,6 @@ class YouGetGUI:
         self.settings_window.title("Settings")
         self.settings_window.resizable(False, False)
 
-        # Запоминаем пользовательский выбор
-        # remember the options ()
-        # for i in self.selected_options:
-        #     self.option_vars[i].set(True)
-
         # Создаем фреймы для каждого блока
         self.dry_run_labelframe = tk.LabelFrame(self.settings_window, text="Dry run")
         self.dry_run_labelframe.grid(
@@ -243,7 +245,7 @@ class YouGetGUI:
         self.print_combobox = ttk.Combobox(
             self.dry_run_labelframe,
             textvariable=self.print_combobox_text,
-            state="disabled",
+            state="readonly" if self.print_var.get() else "disabled",
         )
         self.print_list = [value.verbose_name for value in self.dry_run_options_list]
         self.print_combobox["values"] = list(self.print_list)
@@ -277,7 +279,7 @@ class YouGetGUI:
                 self.download_options_entries_frame,
                 width=15,
                 textvariable=self.download_options_entries_vars[idx],
-                state="disabled",
+                state="normal" if self.download_options_checkboxes_with_entry_vars[idx].get() else "disabled",
             )
             option_entry_for_checkbox.grid(row=idx, column=1, padx=10, pady=5)
 
@@ -288,6 +290,7 @@ class YouGetGUI:
             variable=self.proxy_var,
             onvalue=True,
             offvalue=False,
+            state="disabled" if self.other_proxy_options_vars[0].get() else "normal",
             command=lambda: self.proxy_options_enabled()
             if self.proxy_var.get()
             else self.proxy_options_disabled(),
@@ -300,14 +303,14 @@ class YouGetGUI:
             self.proxy_options_labelframe,
             width="30",
             textvariable=self.proxy_combobox_text,
-            state="disabled",
+            state="readonly" if self.proxy_var.get() else "disabled",
         )
         self.proxy_list = [value.verbose_name for value in self.proxy_options_list]
         self.proxy_combobox["values"] = list(self.proxy_list)
         self.proxy_combobox.grid(column=1, row=0, pady=5)
 
         self.host_port_label = ttk.Label(
-            self.proxy_options_labelframe, text="Enter HOST::PORT: ", state="disabled"
+            self.proxy_options_labelframe, text="Enter HOST::PORT: ", state="normal" if self.proxy_var.get() else "disabled"
         )
         self.host_port_label.grid(column=2, row=0, padx=10, pady=5)
 
@@ -315,7 +318,7 @@ class YouGetGUI:
             self.proxy_options_labelframe,
             width=15,
             textvariable=self.host_port_entry_var,
-            state="disabled",
+            state="normal" if self.proxy_var.get() else "disabled",
         )
         self.host_port_entry.grid(column=3, row=0, padx=5, pady=5)
 
@@ -354,6 +357,7 @@ class YouGetGUI:
     #     ]
     #     for i, widget in enumerate(entry_widgets):
     #         widget.config(state="disabled")
+
     def get_corresponding_entry(self, key):
         entries = [
             widget
@@ -419,7 +423,7 @@ class YouGetGUI:
             if self.other_proxy_options_vars[idx].get():
                 self.builder.insert_flag(flag)
 
-        pprint(self.builder.flags)
+        pprint(self.builder.build())
 
         self.hide_settings_window()
 
