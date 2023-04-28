@@ -95,6 +95,10 @@ class YouGetGUI:
         self.availible_formats = ["mp4", "mp3"]
 
         self.print_var = tk.BooleanVar()
+
+        self.print_combobox_text = tk.StringVar()
+        self.print_combobox_text.set("without urls")
+
         self.download_options_checkboxes_vars = [
             tk.BooleanVar() for _ in self.download_options_checkboxes_list
         ]
@@ -105,10 +109,17 @@ class YouGetGUI:
             tk.StringVar() for _ in self.download_options_entries_list
         ]
         self.proxy_var = tk.BooleanVar()
+
+        self.proxy_combobox_text = tk.StringVar()
+        self.proxy_combobox_text.set("HTTP proxy for downloading")
+
         self.other_proxy_options_vars = [
             tk.BooleanVar() for _ in self.other_proxy_options_list
         ]
         self.host_port_entry_var = tk.StringVar()
+
+
+
 
         self.first_step_widget()
 
@@ -242,8 +253,6 @@ class YouGetGUI:
         )
         self.print_checkbox.grid(column=0, row=0, pady=5)
 
-        self.print_combobox_text = tk.StringVar()
-        self.print_combobox_text.set("without urls")
         self.print_combobox = ttk.Combobox(
             self.dry_run_labelframe,
             textvariable=self.print_combobox_text,
@@ -281,7 +290,9 @@ class YouGetGUI:
                 self.download_options_entries_frame,
                 width=15,
                 textvariable=self.download_options_entries_vars[idx],
-                state="normal" if self.download_options_checkboxes_with_entry_vars[idx].get() else "disabled",
+                state="normal"
+                if self.download_options_checkboxes_with_entry_vars[idx].get()
+                else "disabled",
             )
             option_entry_for_checkbox.grid(row=idx, column=1, padx=10, pady=5)
 
@@ -299,8 +310,6 @@ class YouGetGUI:
         )
         self.proxy_checkbox.grid(column=0, row=0, pady=5, sticky="w")
 
-        self.proxy_combobox_text = tk.StringVar()
-        self.proxy_combobox_text.set("HTTP proxy for downloading")
         self.proxy_combobox = ttk.Combobox(
             self.proxy_options_labelframe,
             width="30",
@@ -312,7 +321,9 @@ class YouGetGUI:
         self.proxy_combobox.grid(column=1, row=0, pady=5)
 
         self.host_port_label = ttk.Label(
-            self.proxy_options_labelframe, text="Enter HOST::PORT: ", state="normal" if self.proxy_var.get() else "disabled"
+            self.proxy_options_labelframe,
+            text="Enter HOST::PORT: ",
+            state="normal" if self.proxy_var.get() else "disabled",
         )
         self.host_port_label.grid(column=2, row=0, padx=10, pady=5)
 
